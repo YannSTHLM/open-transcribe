@@ -14,10 +14,9 @@ on run
 	if isFirstRun then
 		-- First run: create a .command file and open it in Terminal
 		set tempFile to POSIX path of (path to temporary items) & "OpenTranscribe-Setup.command"
-		set commandContent to "#!/bin/bash" & return & "echo 'Welcome to Open Transcribe!'" & return & "echo 'Installing dependencies...'" & return & "bash " & quoted form of installScript & " && echo '' && echo 'Setup complete! Starting Open Transcribe...' && bash " & quoted form of startScript
 		
-		-- Write .command file
-		do shell script "cat > " & quoted form of tempFile & " << 'SCRIPT'" & return & commandContent & return & "SCRIPT"
+		-- Write .command file using shell printf (proper Unix newlines)
+		do shell script "printf '#!/bin/bash\\necho \"Welcome to Open Transcribe!\"\\necho \"Installing dependencies...\"\\nbash " & quoted form of installScript & " && echo \"\" && echo \"Setup complete! Starting Open Transcribe...\" && bash " & quoted form of startScript & "\\n' > " & quoted form of tempFile
 		do shell script "chmod +x " & quoted form of tempFile
 		
 		-- Open the .command file (macOS opens .command files in Terminal)
@@ -35,9 +34,9 @@ on run
 		else
 			-- Not running, create a .command file to start servers
 			set tempFile to POSIX path of (path to temporary items) & "OpenTranscribe-Start.command"
-			set commandContent to "#!/bin/bash" & return & "bash " & quoted form of startScript
 			
-			do shell script "cat > " & quoted form of tempFile & " << 'SCRIPT'" & return & commandContent & return & "SCRIPT"
+			-- Write .command file using shell printf
+			do shell script "printf '#!/bin/bash\\nbash " & quoted form of startScript & "\\n' > " & quoted form of tempFile
 			do shell script "chmod +x " & quoted form of tempFile
 			do shell script "open " & quoted form of tempFile
 			
