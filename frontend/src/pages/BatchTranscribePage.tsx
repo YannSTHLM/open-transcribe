@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, File, X, Mic, Loader2, CheckCircle, AlertCircle, Trash2 } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
@@ -36,7 +36,7 @@ export function BatchTranscribePage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [model, setModel] = useState('base')
   const [language, setLanguage] = useState('auto')
-  const [batchResult, setBatchResult] = useState<BatchResult | null>(null)
+  const [, setBatchResult] = useState<BatchResult | null>(null)
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles = acceptedFiles.map(file => ({

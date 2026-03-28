@@ -1,10 +1,10 @@
-import React, { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, File, X, Mic, Loader2, CheckCircle, AlertCircle } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { formatFileSize, formatDuration } from '@/lib/utils'
+import { formatFileSize } from '@/lib/utils'
 
 interface TranscriptionResult {
   id: string
