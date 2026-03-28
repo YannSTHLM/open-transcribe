@@ -54,7 +54,11 @@ A powerful, privacy-focused web application for audio/video transcription using 
 4. Double-click **Open Transcribe** to launch
 5. On first launch, the app will automatically install all dependencies (Python, Node.js, FFmpeg) — this may take a few minutes
 
-> **Note:** If macOS blocks the app, go to **System Settings → Privacy & Security** and click **"Open Anyway"**.
+> **⚠️ If macOS says the app is "damaged":** This is a Gatekeeper issue for unsigned apps. Open **Terminal** and run:
+> ```bash
+> xattr -cr /Applications/Open\ Transcribe.app
+> ```
+> Then double-click the app again.
 
 ### Developer Install (Clone & Run)
 

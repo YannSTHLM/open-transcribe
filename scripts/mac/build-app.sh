@@ -106,6 +106,15 @@ if [ -f "$SYSTEM_ICON" ]; then
     cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
 fi
 
+# -------------------------------------------------------
+# 7. Ad-hoc code sign the app (required to pass Gatekeeper)
+# -------------------------------------------------------
+echo "Code signing..."
+# Sign all executables and frameworks first (deep signing)
+find "$APP_BUNDLE/Contents/MacOS" -type f -exec codesign --force --sign - {} \; 2>/dev/null || true
+# Sign the app bundle itself
+codesign --force --deep --sign - "$APP_BUNDLE" 2>/dev/null || true
+
 echo ""
 echo "✅ Built: $APP_BUNDLE"
 echo ""
