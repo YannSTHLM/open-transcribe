@@ -42,11 +42,6 @@ app.add_middleware(
 app.include_router(transcription.router, prefix="/api/v1", tags=["transcription"])
 app.include_router(models.router, prefix="/api/v1", tags=["models"])
 
-# Serve static files (frontend) in production
-frontend_dist = os.path.join(os.path.dirname(__file__), "../../frontend/dist")
-if os.path.exists(frontend_dist):
-    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
-
 @app.get("/api/v1/health")
 async def health():
     """Health check endpoint."""
@@ -56,11 +51,63 @@ async def health():
         "environment": settings.ENVIRONMENT
     }
 
+# Serve static files (frontend) in production
+# We check both standard relative path and PyInstaller _MEIPASS path
+import sys
+
+def get_frontend_dist():
+    """Get the path to the frontend dist folder, handling PyInstaller environment."""
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        return os.path.join(sys._MEIPASS, 'frontend_dist')
+    
+    # Standard development path
+    return os.path.abspath(os.path.join(os.path.dirname(__file__), "../../frontend/dist"))
+
+frontend_dist = get_frontend_dist()
+if os.path.exists(frontend_dist):
+    logger.info(f"Serving frontend from {frontend_dist}")
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
+else:
+    logger.warning(f"Frontend dist not found at {frontend_dist}")
+
+# Ensure any unmatched routes fall back to index.html for client-side routing
+@app.exception_handler(404)
+async def custom_404_handler(request, exc):
+    if os.path.exists(frontend_dist) and not request.url.path.startswith("/api/"):
+        from fastapi.responses import FileResponse
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+    from fastapi.responses import JSONResponse
+    return JSONResponse({"detail": "Not Found"}, status_code=404)
 if __name__ == "__main__":
+    import webbrowser
+    import threading
+    import time
+    
+    def open_browser():
+        time.sleep(1.5)
+        webbrowser.open(f"http://{settings.HOST}:{settings.PORT}")
+        
+    # Only auto-open browser in production/bundled mode
+    if hasattr(sys, '_MEIPASS'):
+        threading.Thread(target=open_browser, daemon=True).start()
+
+    # When bundled, reload should always be False.
+    is_bundled = hasattr(sys, '_MEIPASS')
+    
     import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host=settings.HOST,
-        port=settings.PORT,
-        reload=settings.DEBUG
-    )
+    if is_bundled:
+        # In pyinstaller, we must pass the app object directly, not a string
+        uvicorn.run(
+            app,
+            host=settings.HOST,
+            port=settings.PORT,
+            reload=False
+        )
+    else:
+        uvicorn.run(
+            "app.main:app",
+            host=settings.HOST,
+            port=settings.PORT,
+            reload=settings.DEBUG
+        )

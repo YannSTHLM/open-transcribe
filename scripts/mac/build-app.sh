@@ -1,5 +1,5 @@
 #!/bin/bash
-# Open Transcribe - Build macOS .app bundle
+# Open Transcribe - Build macOS .app bundle via PyInstaller
 # Usage: bash build-app.sh
 
 set -e
@@ -19,60 +19,61 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
 # -------------------------------------------------------
-# 2. Compile AppleScript to .app bundle (creates the bundle)
+# 2. Build Frontend (React -> static files)
 # -------------------------------------------------------
-echo "Compiling AppleScript..."
-osacompile -o "$APP_BUNDLE" "$SCRIPT_DIR/OpenTranscribe.applescript"
+echo "Building frontend..."
+cd "$APP_DIR/frontend"
+npm install
+npm run build
 
 # -------------------------------------------------------
-# 3. Copy project files into the .app bundle
+# 3. Build Backend using PyInstaller
 # -------------------------------------------------------
-echo "Copying project files..."
+echo "Bundling backend via PyInstaller..."
+cd "$APP_DIR/backend"
 
-# Copy backend
-rsync -a --exclude='venv/' \
-       --exclude='__pycache__/' \
-       --exclude='*.pyc' \
-       --exclude='data/' \
-       --exclude='.env' \
-       "$APP_DIR/backend/" "$APP_BUNDLE/Contents/Resources/backend/"
+# Ensure PyInstaller is installed in the current environment
+if [ ! -d "venv" ]; then
+    echo "Creating virtual environment for build..."
+    python3 -m venv venv
+fi
+source venv/bin/activate
+pip install -r requirements.txt
+pip install pyinstaller
 
-# Copy frontend
-rsync -a --exclude='node_modules/' \
-       --exclude='dist/' \
-       "$APP_DIR/frontend/" "$APP_BUNDLE/Contents/Resources/frontend/"
+# Run PyInstaller
+pyinstaller --clean -y app.spec
 
-# Copy scripts
-mkdir -p "$APP_BUNDLE/Contents/Resources/scripts/mac"
-cp "$SCRIPT_DIR/install.sh" "$APP_BUNDLE/Contents/Resources/scripts/mac/"
-cp "$SCRIPT_DIR/start.sh" "$APP_BUNDLE/Contents/Resources/scripts/mac/"
-cp "$SCRIPT_DIR/stop.sh" "$APP_BUNDLE/Contents/Resources/scripts/mac/"
+# -------------------------------------------------------
+# 4. Construct .app bundle
+# -------------------------------------------------------
+echo "Constructing .app bundle..."
 
-# Create .pids directory
-mkdir -p "$APP_BUNDLE/Contents/Resources/.pids"
+mkdir -p "$APP_BUNDLE/Contents/MacOS"
+mkdir -p "$APP_BUNDLE/Contents/Resources"
 
-# Create .command launcher files (pre-built to avoid AppleScript quoting issues)
-cat > "$APP_BUNDLE/Contents/Resources/setup.command" << 'LAUNCHER'
+# Move the single folder build from PyInstaller into MacOS
+cp -r "dist/OpenTranscribe/" "$APP_BUNDLE/Contents/MacOS/OpenTranscribe_Core/"
+
+# Create a small native launcher script inside MacOS
+cat > "$APP_BUNDLE/Contents/MacOS/applet" << 'LAUNCHER'
 #!/bin/bash
-# Navigate to the app bundle directory
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-echo "Welcome to Open Transcribe!"
-echo "Installing dependencies..."
-bash "$SCRIPT_DIR/scripts/mac/install.sh" && echo "" && echo "Setup complete! Starting Open Transcribe..." && bash "$SCRIPT_DIR/scripts/mac/start.sh"
+exec "$SCRIPT_DIR/OpenTranscribe_Core/OpenTranscribe"
 LAUNCHER
-
-cat > "$APP_BUNDLE/Contents/Resources/start.command" << 'LAUNCHER'
-#!/bin/bash
-# Navigate to the app bundle directory
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-bash "$SCRIPT_DIR/scripts/mac/start.sh"
-LAUNCHER
-
-chmod +x "$APP_BUNDLE/Contents/Resources/setup.command"
-chmod +x "$APP_BUNDLE/Contents/Resources/start.command"
+chmod +x "$APP_BUNDLE/Contents/MacOS/applet"
 
 # -------------------------------------------------------
-# 4. Update Info.plist
+# 5. Application Icon
+# -------------------------------------------------------
+# Use system icon as placeholder if we don't have one
+SYSTEM_ICON="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarUtilitiesFolderIcon.icns"
+if [ -f "$SYSTEM_ICON" ]; then
+    cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
+fi
+
+# -------------------------------------------------------
+# 6. Update Info.plist
 # -------------------------------------------------------
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -96,7 +97,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleIconFile</key>
-    <string>applet</string>
+    <string>applet.icns</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>LSMinimumSystemVersion</key>
@@ -112,22 +113,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 PLIST
 
 # -------------------------------------------------------
-# 5. Make scripts executable
-# -------------------------------------------------------
-chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/install.sh"
-chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/start.sh"
-chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/stop.sh"
-
-# -------------------------------------------------------
-# 6. Create a simple app icon (using system icon as placeholder)
-# -------------------------------------------------------
-SYSTEM_ICON="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarUtilitiesFolderIcon.icns"
-if [ -f "$SYSTEM_ICON" ]; then
-    cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
-fi
-
-# -------------------------------------------------------
-# 7. Ad-hoc code sign the app (required to pass Gatekeeper)
+# 7. Ad-hoc code sign the app
 # -------------------------------------------------------
 echo "Code signing..."
 # Sign all executables and frameworks first (deep signing)

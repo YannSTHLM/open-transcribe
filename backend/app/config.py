@@ -13,21 +13,31 @@ class Settings(BaseSettings):
     HOST: str = "0.0.0.0"
     PORT: int = 8000
     
+    # Base Data Directory - Store in user's home directory so data persists across app updates
+    DATA_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe")
+    
     # Database
-    DATABASE_URL: str = "sqlite:///./data/whisper.db"
+    @property
+    def DATABASE_URL(self) -> str:
+        return f"sqlite:///{os.path.join(self.DATA_DIR, 'whisper.db')}"
     
     # Whisper
-    WHISPER_MODEL_DIR: str = "~/.cache/whisper"
+    WHISPER_MODEL_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe/models")
     DEFAULT_MODEL: str = "base"
     DEFAULT_LANGUAGE: str = "auto"
     
     # File Upload
-    UPLOAD_DIR: str = "./data/uploads"
+    @property
+    def UPLOAD_DIR(self) -> str:
+        return os.path.join(self.DATA_DIR, "uploads")
+        
     MAX_UPLOAD_SIZE: int = 524288000  # 500MB
     ALLOWED_EXTENSIONS: str = "mp3,wav,m4a,flac,ogg,mp4,mkv,avi,mov,webm"
     
     # Storage
-    TRANSCRIPTION_DIR: str = "./data/transcriptions"
+    @property
+    def TRANSCRIPTION_DIR(self) -> str:
+        return os.path.join(self.DATA_DIR, "transcriptions")
     
     # GPU
     USE_GPU: bool = True
@@ -48,9 +58,10 @@ class Settings(BaseSettings):
     
     def ensure_directories(self):
         """Create necessary directories if they don't exist."""
+        os.makedirs(self.DATA_DIR, exist_ok=True)
         os.makedirs(self.UPLOAD_DIR, exist_ok=True)
         os.makedirs(self.TRANSCRIPTION_DIR, exist_ok=True)
-        os.makedirs("./data", exist_ok=True)
+        os.makedirs(self.WHISPER_MODEL_DIR, exist_ok=True)
     
     class Config:
         env_file = ".env"
