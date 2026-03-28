@@ -116,6 +116,12 @@ echo "Setting up backend..."
 # -------------------------------------------------------
 cd "$APP_DIR/backend"
 
+# If venv exists but setup never completed, it's broken — delete it
+if [ -d "venv" ] && [ ! -f ".setup-complete" ]; then
+    echo -e "${YELLOW}Found incomplete installation, cleaning up...${NC}"
+    rm -rf venv
+fi
+
 if [ ! -d "venv" ]; then
     echo -e "${BLUE}Creating Python virtual environment with $PYTHON_BIN...${NC}"
     $PYTHON_BIN -m venv venv
