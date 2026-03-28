@@ -1,64 +1,55 @@
 -- Open Transcribe - macOS App Wrapper
--- This AppleScript creates a native macOS .app that launches and manages Open Transcribe
+-- Uses .command files which macOS opens in Terminal automatically
+-- Avoids "tell application Terminal" to prevent Automation permission errors
 
 on run
 	set appDir to POSIX path of (path to me) & "Contents/Resources/"
 	set installScript to appDir & "scripts/mac/install.sh"
 	set startScript to appDir & "scripts/mac/start.sh"
-	set stopScript to appDir & "scripts/mac/stop.sh"
-	set lockFile to appDir & ".pids/running.lock"
 	
-	-- Check if this is the first run (no venv exists)
-	set venvPath to appDir & "backend/venv/"
-	tell application "System Events"
-		set isFirstRun to not (exists folder venvPath)
-	end tell
+	-- Check if first run by testing if venv directory exists
+	set venvCheck to do shell script "if [ -d " & quoted form of (appDir & "backend/venv/") & " ]; then echo yes; else echo no; fi"
+	set isFirstRun to (venvCheck is "no")
 	
 	if isFirstRun then
-		-- First run: show setup dialog and install dependencies
-		set dialogMessage to "Welcome to Open Transcribe!" & return & return & "This will install the required dependencies:" & return & "• Python 3.12" & return & "• Node.js 20" & return & "• FFmpeg" & return & "• Python packages" & return & "• Node.js packages" & return & return & "This may take a few minutes."
-		display dialog dialogMessage with title "Open Transcribe - First Run Setup" buttons {"Cancel", "Install"} default button "Install" with icon note
+		-- First run: create a .command file and open it in Terminal
+		set tempFile to POSIX path of (path to temporary items) & "OpenTranscribe-Setup.command"
+		set commandContent to "#!/bin/bash" & return & "echo 'Welcome to Open Transcribe!'" & return & "echo 'Installing dependencies...'" & return & "bash " & quoted form of installScript & " && echo '' && echo 'Setup complete! Starting Open Transcribe...' && bash " & quoted form of startScript
 		
-		if button returned of result is "Cancel" then
-			return
-		end if
+		-- Write .command file
+		do shell script "cat > " & quoted form of tempFile & " << 'SCRIPT'" & return & commandContent & return & "SCRIPT"
+		do shell script "chmod +x " & quoted form of tempFile
 		
-		-- Run installer in Terminal
-		tell application "Terminal"
-			activate
-			set shellCmd to "bash " & quoted form of POSIX path of installScript & " && echo '' && echo 'Press Enter to close this window and launch Open Transcribe...' && read && echo 'Starting Open Transcribe...' && bash " & quoted form of POSIX path of startScript & " --no-wait && exit 0"
-			do script shellCmd
-		end tell
+		-- Open the .command file (macOS opens .command files in Terminal)
+		do shell script "open " & quoted form of tempFile
 		
-		-- Wait a moment then open browser
-		delay 15
+		-- Wait then open browser
+		delay 20
 		open location "http://localhost:5173"
 	else
-		-- Not first run: just start servers
-		-- Check if already running
-		try
-			do shell script "curl -s http://localhost:8000/api/v1/health"
+		-- Not first run: check if already running
+		set healthCheck to do shell script "curl -s http://localhost:8000/api/v1/health 2>/dev/null || echo 'not-running'"
+		if healthCheck contains "ok" then
 			-- Already running, just open browser
 			open location "http://localhost:5173"
-		on error
-			-- Not running, start servers
-			tell application "Terminal"
-				activate
-				set shellCmd to "bash " & quoted form of POSIX path of startScript & " --no-wait"
-				do script shellCmd
-			end tell
+		else
+			-- Not running, create a .command file to start servers
+			set tempFile to POSIX path of (path to temporary items) & "OpenTranscribe-Start.command"
+			set commandContent to "#!/bin/bash" & return & "bash " & quoted form of startScript
+			
+			do shell script "cat > " & quoted form of tempFile & " << 'SCRIPT'" & return & commandContent & return & "SCRIPT"
+			do shell script "chmod +x " & quoted form of tempFile
+			do shell script "open " & quoted form of tempFile
+			
 			delay 10
 			open location "http://localhost:5173"
-		end try
+		end if
 	end if
 end run
 
 on quit
 	set appDir to POSIX path of (path to me) & "Contents/Resources/"
 	set stopScript to appDir & "scripts/mac/stop.sh"
-	
-	-- Stop servers
-	do shell script "bash " & quoted form of POSIX path of stopScript
-	
+	do shell script "bash " & quoted form of stopScript
 	continue quit
 end quit
