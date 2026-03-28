@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment files
+.env
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backend data
+backend/data/uploads/
+backend/data/transcriptions/
+backend/data/whisper.db
+backend/venv/
+backend/~/
+
+# Whisper model cache
+models/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+
+# Logs
+*.log
+
+# Database
+*.db
