@@ -19,13 +19,13 @@ rm -rf "$BUILD_DIR"
 mkdir -p "$BUILD_DIR"
 
 # -------------------------------------------------------
-# 2. Create .app bundle structure
+# 2. Compile AppleScript to .app bundle (creates the bundle)
 # -------------------------------------------------------
-mkdir -p "$APP_BUNDLE/Contents/MacOS"
-mkdir -p "$APP_BUNDLE/Contents/Resources"
+echo "Compiling AppleScript..."
+osacompile -o "$APP_BUNDLE" "$SCRIPT_DIR/OpenTranscribe.applescript"
 
 # -------------------------------------------------------
-# 3. Copy project files (excluding build artifacts)
+# 3. Copy project files into the .app bundle
 # -------------------------------------------------------
 echo "Copying project files..."
 
@@ -52,7 +52,7 @@ cp "$SCRIPT_DIR/stop.sh" "$APP_BUNDLE/Contents/Resources/scripts/mac/"
 mkdir -p "$APP_BUNDLE/Contents/Resources/.pids"
 
 # -------------------------------------------------------
-# 4. Create Info.plist
+# 4. Update Info.plist
 # -------------------------------------------------------
 cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -62,7 +62,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleExecutable</key>
-    <string>OpenTranscribe</string>
+    <string>applet</string>
     <key>CFBundleIdentifier</key>
     <string>com.opentranscribe.app</string>
     <key>CFBundleName</key>
@@ -76,7 +76,7 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>CFBundleIconFile</key>
-    <string>AppIcon</string>
+    <string>applet</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>LSMinimumSystemVersion</key>
@@ -92,26 +92,18 @@ cat > "$APP_BUNDLE/Contents/Info.plist" << 'PLIST'
 PLIST
 
 # -------------------------------------------------------
-# 5. Compile AppleScript to app executable
-# -------------------------------------------------------
-echo "Compiling AppleScript..."
-osacompile -o "$APP_BUNDLE" "$SCRIPT_DIR/OpenTranscribe.applescript"
-
-# -------------------------------------------------------
-# 6. Make scripts executable
+# 5. Make scripts executable
 # -------------------------------------------------------
 chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/install.sh"
 chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/start.sh"
 chmod +x "$APP_BUNDLE/Contents/Resources/scripts/mac/stop.sh"
 
 # -------------------------------------------------------
-# 7. Create a simple app icon (using system icon as placeholder)
+# 6. Create a simple app icon (using system icon as placeholder)
 # -------------------------------------------------------
-# Create a basic .icns from the system Script Editor icon as placeholder
-# In production, you'd replace this with a custom icon
 SYSTEM_ICON="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarUtilitiesFolderIcon.icns"
 if [ -f "$SYSTEM_ICON" ]; then
-    cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
+    cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
 fi
 
 echo ""
