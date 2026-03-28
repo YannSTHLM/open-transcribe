@@ -52,7 +52,7 @@ A powerful, privacy-focused web application for audio/video transcription using 
 2. Open the downloaded `.dmg`
 3. Drag **Open Transcribe** to your **Applications** folder
 4. Double-click **Open Transcribe** to launch
-5. On first launch, the app will automatically install all dependencies (Python, Node.js, FFmpeg) — this may take a few minutes
+5. On first launch, the app opens your browser automatically — no other software needed
 
 > **⚠️ macOS Gatekeeper Warning (unsigned app):**
 >
@@ -183,51 +183,10 @@ You're ready to transcribe! 🎉
 2. Search through past transcriptions
 3. View, export, or delete transcriptions
 
-## 🖥️ Desktop Installation (One-Click Launch)
+## 🖥️ Building the macOS App (Developers)
 
-For non-technical users, Open Transcribe includes scripts that handle everything automatically. **You only need to run one command** — the script will check for and install all required dependencies (Python, Node.js, FFmpeg, and project packages), then launch the app.
+The macOS app is a self-contained PyInstaller bundle — no Python, Node.js, or FFmpeg installation needed by end users.
 
-### macOS
-
-#### Option A: Quick Start (Terminal)
-
-1. Open **Terminal** (press `⌘ + Space`, type "Terminal", press Enter)
-2. Navigate to the project folder:
-   ```bash
-   cd /path/to/whisper-webapp
-   ```
-3. **First run — install everything and start the app:**
-   ```bash
-   bash scripts/mac/install.sh && bash scripts/mac/start.sh
-   ```
-   This single command will:
-   - ✓ Check for and install **Homebrew** (macOS package manager)
-   - ✓ Check for and install **Python 3.12** via Homebrew
-   - ✓ Check for and install **Node.js 20** via Homebrew
-   - ✓ Check for and install **FFmpeg** via Homebrew
-   - ✓ Create a Python virtual environment
-   - ✓ Install all Python packages
-   - ✓ Install all Node.js packages
-   - ✓ Start both servers and open the app in your browser
-
-4. **To stop the app later:**
-   ```bash
-   bash scripts/mac/stop.sh
-   ```
-
-5. **To start again (no re-install needed):**
-   ```bash
-   bash scripts/mac/start.sh
-   ```
-
-#### Option B: macOS .app (Double-Click)
-
-If someone has built the `.app` for you (or you built it with the scripts below):
-
-1. Double-click **Open Transcribe** — on first launch it will automatically install all dependencies, then start the app
-2. Subsequent launches skip installation and start directly
-
-To build the `.app` yourself:
 ```bash
 bash scripts/mac/build-app.sh    # Creates build/Open Transcribe.app
 bash scripts/mac/build-dmg.sh    # Creates build/Open-Transcribe-macOS.dmg
