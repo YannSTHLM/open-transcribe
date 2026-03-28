@@ -4,10 +4,10 @@
 on run
 	set appDir to POSIX path of (path to me) & "Contents/Resources/"
 	
-	-- Check if first run by testing if venv directory exists
-	set venvCheck to do shell script "if [ -d " & quoted form of (appDir & "backend/venv/") & " ]; then echo yes; else echo no; fi"
+	-- Check if first run by testing if setup completed successfully
+	set setupCheck to do shell script "if [ -f " & quoted form of (appDir & "backend/.setup-complete") & " ]; then echo yes; else echo no; fi"
 	
-	if venvCheck is "no" then
+	if setupCheck is "no" then
 		-- First run: open setup.command (installs deps + starts servers)
 		do shell script "open " & quoted form of (appDir & "setup.command")
 		delay 20

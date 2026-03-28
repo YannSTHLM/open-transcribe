@@ -48,21 +48,35 @@ else
 fi
 
 # -------------------------------------------------------
-# 2. Check for Python 3.10+
+# 2. Check for Python 3.10–3.12 (3.13+ is NOT supported)
 # -------------------------------------------------------
-PYTHON_OK=false
-if command_exists python3; then
-    PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    if version_ge "$PYTHON_VERSION" "3.10"; then
-        PYTHON_OK=true
-        echo -e "${GREEN}✓ Python $PYTHON_VERSION found${NC}"
+PYTHON_BIN=""
+# First check for python3.12 explicitly (most reliable)
+if command -v python3.12 &> /dev/null; then
+    PYTHON_BIN="python3.12"
+elif command -v python3.11 &> /dev/null; then
+    PYTHON_BIN="python3.11"
+elif command -v python3.10 &> /dev/null; then
+    PYTHON_BIN="python3.10"
+else
+    # Check default python3 but reject 3.13+
+    if command_exists python3; then
+        PY_MAJOR=$(python3 -c 'import sys; print(sys.version_info.major)')
+        PY_MINOR=$(python3 -c 'import sys; print(sys.version_info.minor)')
+        if [ "$PY_MAJOR" -eq 3 ] && [ "$PY_MINOR" -ge 10 ] && [ "$PY_MINOR" -le 12 ]; then
+            PYTHON_BIN="python3"
+        fi
     fi
 fi
 
-if [ "$PYTHON_OK" = false ]; then
-    echo -e "${YELLOW}Python 3.10+ not found. Installing...${NC}"
+if [ -n "$PYTHON_BIN" ]; then
+    PYTHON_VERSION=$($PYTHON_BIN -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+    echo -e "${GREEN}✓ Python $PYTHON_VERSION found ($PYTHON_BIN)${NC}"
+else
+    echo -e "${YELLOW}Python 3.10–3.12 not found (3.13+ is not supported). Installing Python 3.12...${NC}"
     brew install python@3.12
-    echo -e "${GREEN}✓ Python installed${NC}"
+    PYTHON_BIN="python3.12"
+    echo -e "${GREEN}✓ Python 3.12 installed${NC}"
 fi
 
 # -------------------------------------------------------
@@ -103,8 +117,8 @@ echo "Setting up backend..."
 cd "$APP_DIR/backend"
 
 if [ ! -d "venv" ]; then
-    echo -e "${BLUE}Creating Python virtual environment...${NC}"
-    python3 -m venv venv
+    echo -e "${BLUE}Creating Python virtual environment with $PYTHON_BIN...${NC}"
+    $PYTHON_BIN -m venv venv
     echo -e "${GREEN}✓ Virtual environment created${NC}"
 else
     echo -e "${GREEN}✓ Virtual environment exists${NC}"
@@ -158,6 +172,9 @@ if [ ! -d "dist" ]; then
 else
     echo -e "${GREEN}✓ Frontend build exists${NC}"
 fi
+
+# Create marker file so the app knows setup is complete
+touch "$APP_DIR/backend/.setup-complete"
 
 echo ""
 echo "╔══════════════════════════════════════╗"
