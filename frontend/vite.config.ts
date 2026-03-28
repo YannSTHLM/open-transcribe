@@ -12,6 +12,7 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    strictPort: true, // Fail if port is in use, rather than auto-incrementing
     proxy: {
       '/api': {
         target: 'http://localhost:8000',
