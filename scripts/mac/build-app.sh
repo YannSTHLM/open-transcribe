@@ -51,6 +51,26 @@ cp "$SCRIPT_DIR/stop.sh" "$APP_BUNDLE/Contents/Resources/scripts/mac/"
 # Create .pids directory
 mkdir -p "$APP_BUNDLE/Contents/Resources/.pids"
 
+# Create .command launcher files (pre-built to avoid AppleScript quoting issues)
+cat > "$APP_BUNDLE/Contents/Resources/setup.command" << 'LAUNCHER'
+#!/bin/bash
+# Navigate to the app bundle directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+echo "Welcome to Open Transcribe!"
+echo "Installing dependencies..."
+bash "$SCRIPT_DIR/scripts/mac/install.sh" && echo "" && echo "Setup complete! Starting Open Transcribe..." && bash "$SCRIPT_DIR/scripts/mac/start.sh"
+LAUNCHER
+
+cat > "$APP_BUNDLE/Contents/Resources/start.command" << 'LAUNCHER'
+#!/bin/bash
+# Navigate to the app bundle directory
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+bash "$SCRIPT_DIR/scripts/mac/start.sh"
+LAUNCHER
+
+chmod +x "$APP_BUNDLE/Contents/Resources/setup.command"
+chmod +x "$APP_BUNDLE/Contents/Resources/start.command"
+
 # -------------------------------------------------------
 # 4. Update Info.plist
 # -------------------------------------------------------
