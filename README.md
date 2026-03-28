@@ -151,6 +151,60 @@ You're ready to transcribe! 🎉
 2. Search through past transcriptions
 3. View, export, or delete transcriptions
 
+## 🖥️ Desktop Installation (One-Click Launch)
+
+For non-technical users, Open Transcribe includes scripts for easy one-click installation and launching. On first run, the scripts will automatically install all required dependencies (Python, Node.js, FFmpeg, and project packages).
+
+### macOS
+
+**Quick Start (Terminal):**
+
+```bash
+# First run — installs all dependencies
+bash scripts/mac/install.sh
+
+# Start the app (opens browser automatically)
+bash scripts/mac/start.sh
+
+# Stop the app
+bash scripts/mac/stop.sh
+```
+
+**Build a macOS .app (drag-and-drop installer):**
+
+```bash
+# Build .app bundle
+bash scripts/mac/build-app.sh
+
+# Build .dmg installer
+bash scripts/mac/build-dmg.sh
+```
+
+The `.dmg` file will be in the `build/` folder. Open it, drag **Open Transcribe** to your Applications folder, and double-click to launch.
+
+### Windows
+
+**Quick Start (PowerShell):**
+
+```powershell
+# First run — installs all dependencies
+powershell -ExecutionPolicy Bypass -File scripts\windows\install.ps1
+
+# Start the app (opens browser automatically)
+powershell -ExecutionPolicy Bypass -File scripts\windows\start.ps1
+
+# Stop the app
+powershell -ExecutionPolicy Bypass -File scripts\windows\stop.ps1
+```
+
+**Or just double-click `scripts\windows\launcher.vbs`** — it will automatically install on first run and start the app.
+
+**Build a Windows installer (.exe):**
+
+1. Install [Inno Setup](https://jrsoftware.org/isinfo.php)
+2. Open `scripts/windows/build-exe.iss` in Inno Setup
+3. Click **Build** to create `OpenTranscribe-Setup-Windows.exe` in the `build/` folder
+
 ## 📁 Project Structure
 
 ```
@@ -173,6 +227,21 @@ whisper-webapp/
 │   │   └── styles/            # CSS styles
 │   ├── package.json           # Node dependencies
 │   └── vite.config.ts         # Vite configuration
+│
+├── scripts/
+│   ├── mac/                   # macOS install/start/stop/build scripts
+│   │   ├── install.sh         # First-run dependency installer
+│   │   ├── start.sh           # Start both servers + open browser
+│   │   ├── stop.sh            # Stop both servers
+│   │   ├── OpenTranscribe.applescript  # .app wrapper
+│   │   ├── build-app.sh       # Build macOS .app bundle
+│   │   └── build-dmg.sh       # Build macOS .dmg installer
+│   └── windows/               # Windows install/start/stop scripts
+│       ├── install.ps1        # First-run dependency installer
+│       ├── start.ps1          # Start both servers + open browser
+│       ├── stop.ps1           # Stop both servers
+│       ├── launcher.vbs       # Double-click launcher
+│       └── build-exe.iss      # Inno Setup installer config
 │
 └── README.md
 ```

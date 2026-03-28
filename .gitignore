@@ -28,6 +28,12 @@ env/
 .DS_Store
 Thumbs.db
 
+# Build output
+build/
+
+# PID files
+.pids/
+
 # Backend data
 backend/data/uploads/
 backend/data/transcriptions/
