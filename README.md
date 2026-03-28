@@ -44,7 +44,21 @@ A powerful, privacy-focused web application for audio/video transcription using 
 
 ## 📦 How to Install
 
-### 1. Clone the Repository
+### Quick Install (macOS — No Terminal Needed)
+
+[⬇️ Download Open Transcribe for macOS](https://github.com/YannSTHLM/open-transcribe/releases/latest/download/Open-Transcribe-macOS.dmg)
+
+1. Download the `.dmg` file using the link above
+2. Open the downloaded `.dmg`
+3. Drag **Open Transcribe** to your **Applications** folder
+4. Double-click **Open Transcribe** to launch
+5. On first launch, the app will automatically install all dependencies (Python, Node.js, FFmpeg) — this may take a few minutes
+
+> **Note:** If macOS blocks the app, go to **System Settings → Privacy & Security** and click **"Open Anyway"**.
+
+### Developer Install (Clone & Run)
+
+#### 1. Clone the Repository
 
 ```bash
 git clone <repository-url>
