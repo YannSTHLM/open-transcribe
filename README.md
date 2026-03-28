@@ -153,57 +153,100 @@ You're ready to transcribe! 🎉
 
 ## 🖥️ Desktop Installation (One-Click Launch)
 
-For non-technical users, Open Transcribe includes scripts for easy one-click installation and launching. On first run, the scripts will automatically install all required dependencies (Python, Node.js, FFmpeg, and project packages).
+For non-technical users, Open Transcribe includes scripts that handle everything automatically. **You only need to run one command** — the script will check for and install all required dependencies (Python, Node.js, FFmpeg, and project packages), then launch the app.
 
 ### macOS
 
-**Quick Start (Terminal):**
+#### Option A: Quick Start (Terminal)
 
+1. Open **Terminal** (press `⌘ + Space`, type "Terminal", press Enter)
+2. Navigate to the project folder:
+   ```bash
+   cd /path/to/whisper-webapp
+   ```
+3. **First run — install everything and start the app:**
+   ```bash
+   bash scripts/mac/install.sh && bash scripts/mac/start.sh
+   ```
+   This single command will:
+   - ✓ Check for and install **Homebrew** (macOS package manager)
+   - ✓ Check for and install **Python 3.12** via Homebrew
+   - ✓ Check for and install **Node.js 20** via Homebrew
+   - ✓ Check for and install **FFmpeg** via Homebrew
+   - ✓ Create a Python virtual environment
+   - ✓ Install all Python packages
+   - ✓ Install all Node.js packages
+   - ✓ Start both servers and open the app in your browser
+
+4. **To stop the app later:**
+   ```bash
+   bash scripts/mac/stop.sh
+   ```
+
+5. **To start again (no re-install needed):**
+   ```bash
+   bash scripts/mac/start.sh
+   ```
+
+#### Option B: macOS .app (Double-Click)
+
+If someone has built the `.app` for you (or you built it with the scripts below):
+
+1. Double-click **Open Transcribe** — on first launch it will automatically install all dependencies, then start the app
+2. Subsequent launches skip installation and start directly
+
+To build the `.app` yourself:
 ```bash
-# First run — installs all dependencies
-bash scripts/mac/install.sh
-
-# Start the app (opens browser automatically)
-bash scripts/mac/start.sh
-
-# Stop the app
-bash scripts/mac/stop.sh
+bash scripts/mac/build-app.sh    # Creates build/Open Transcribe.app
+bash scripts/mac/build-dmg.sh    # Creates build/Open-Transcribe-macOS.dmg
 ```
-
-**Build a macOS .app (drag-and-drop installer):**
-
-```bash
-# Build .app bundle
-bash scripts/mac/build-app.sh
-
-# Build .dmg installer
-bash scripts/mac/build-dmg.sh
-```
-
-The `.dmg` file will be in the `build/` folder. Open it, drag **Open Transcribe** to your Applications folder, and double-click to launch.
 
 ### Windows
 
-**Quick Start (PowerShell):**
+#### Option A: Quick Start (PowerShell)
 
-```powershell
-# First run — installs all dependencies
-powershell -ExecutionPolicy Bypass -File scripts\windows\install.ps1
+1. Open **PowerShell** (press `Win + X`, select "PowerShell")
+2. Navigate to the project folder:
+   ```powershell
+   cd C:\path\to\whisper-webapp
+   ```
+3. **First run — install everything and start the app:**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\windows\install.ps1; powershell -ExecutionPolicy Bypass -File scripts\windows\start.ps1
+   ```
+   This single command will:
+   - ✓ Check for and install **Python 3.12** via winget
+   - ✓ Check for and install **Node.js 20** via winget
+   - ✓ Check for and install **FFmpeg** via winget
+   - ✓ Create a Python virtual environment
+   - ✓ Install all Python packages
+   - ✓ Install all Node.js packages
+   - ✓ Start both servers and open the app in your browser
 
-# Start the app (opens browser automatically)
-powershell -ExecutionPolicy Bypass -File scripts\windows\start.ps1
+4. **To stop the app later:**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\windows\stop.ps1
+   ```
 
-# Stop the app
-powershell -ExecutionPolicy Bypass -File scripts\windows\stop.ps1
-```
+5. **To start again (no re-install needed):**
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File scripts\windows\start.ps1
+   ```
 
-**Or just double-click `scripts\windows\launcher.vbs`** — it will automatically install on first run and start the app.
+#### Option B: Double-Click Launcher
 
-**Build a Windows installer (.exe):**
+Just **double-click `scripts\windows\launcher.vbs`** — it will:
+- Detect if this is the first run (no virtual environment exists)
+- Automatically run the installer on first run
+- Start the app and open the browser
 
+#### Option C: Windows Installer (.exe)
+
+To build a distributable Windows installer:
 1. Install [Inno Setup](https://jrsoftware.org/isinfo.php)
 2. Open `scripts/windows/build-exe.iss` in Inno Setup
 3. Click **Build** to create `OpenTranscribe-Setup-Windows.exe` in the `build/` folder
+4. Share the `.exe` — users just run it, then double-click the desktop shortcut
 
 ## 📁 Project Structure
 
