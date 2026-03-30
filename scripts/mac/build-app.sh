@@ -66,10 +66,16 @@ chmod +x "$APP_BUNDLE/Contents/MacOS/applet"
 # -------------------------------------------------------
 # 5. Application Icon
 # -------------------------------------------------------
-# Use system icon as placeholder if we don't have one
-SYSTEM_ICON="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarUtilitiesFolderIcon.icns"
-if [ -f "$SYSTEM_ICON" ]; then
-    cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
+CUSTOM_ICON="$APP_DIR/assets/applet.icns"
+if [ -f "$CUSTOM_ICON" ]; then
+    cp "$CUSTOM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
+    echo "Using custom icon"
+else
+    echo "Warning: Custom icon not found at $CUSTOM_ICON, using system icon"
+    SYSTEM_ICON="/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/ToolbarUtilitiesFolderIcon.icns"
+    if [ -f "$SYSTEM_ICON" ]; then
+        cp "$SYSTEM_ICON" "$APP_BUNDLE/Contents/Resources/applet.icns"
+    fi
 fi
 
 # -------------------------------------------------------
