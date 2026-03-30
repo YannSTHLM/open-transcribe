@@ -148,12 +148,19 @@ export function TranscribePage() {
     try {
       const response = await fetch(`/api/v1/transcriptions/${result.id}/export?format=${format}`)
       const blob = await response.blob()
+      // Use the filename from the Content-Disposition header set by the backend
+      const contentDisposition = response.headers.get('Content-Disposition')
+      let downloadName = `transcription.${format}`
+      if (contentDisposition) {
+        const match = contentDisposition.match(/filename=([^;]+)/)
+        if (match) {
+          downloadName = match[1]
+        }
+      }
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      // Remove the original audio/video extension before adding the export format
-      const nameWithoutExt = file?.name?.replace(/\.[^.]+$/, '') || 'transcription'
-      a.download = `${nameWithoutExt}.${format}`
+      a.download = downloadName
       a.click()
       window.URL.revokeObjectURL(url)
     } catch (err) {
