@@ -17,9 +17,7 @@ class Settings(BaseSettings):
     DATA_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe")
     
     # Database
-    @property
-    def DATABASE_URL(self) -> str:
-        return f"sqlite:///{os.path.join(self.DATA_DIR, 'whisper.db')}"
+    DATABASE_URL: str = "sqlite:///" + os.path.expanduser("~/Library/Application Support/OpenTranscribe/whisper.db")
     
     # Whisper
     WHISPER_MODEL_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe/models")
@@ -27,17 +25,12 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "auto"
     
     # File Upload
-    @property
-    def UPLOAD_DIR(self) -> str:
-        return os.path.join(self.DATA_DIR, "uploads")
-        
+    UPLOAD_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe/uploads")
     MAX_UPLOAD_SIZE: int = 524288000  # 500MB
     ALLOWED_EXTENSIONS: str = "mp3,wav,m4a,flac,ogg,mp4,mkv,avi,mov,webm"
     
     # Storage
-    @property
-    def TRANSCRIPTION_DIR(self) -> str:
-        return os.path.join(self.DATA_DIR, "transcriptions")
+    TRANSCRIPTION_DIR: str = os.path.expanduser("~/Library/Application Support/OpenTranscribe/transcriptions")
     
     # GPU
     USE_GPU: bool = True

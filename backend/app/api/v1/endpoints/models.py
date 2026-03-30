@@ -85,18 +85,28 @@ async def download_model_async(model_name: str):
 async def delete_model(model_name: str):
     """Delete a downloaded model."""
     cache_dir = Path(settings.WHISPER_MODEL_DIR).expanduser()
-    model_path = cache_dir / f"models--guillaumek--faster-whisper-{model_name}"
     
-    if not model_path.exists():
+    # Check both possible naming conventions
+    model_path_systran = cache_dir / f"models--Systran--faster-whisper-{model_name}"
+    model_path_guillaumek = cache_dir / f"models--guillaumek--faster-whisper-{model_name}"
+    
+    paths_to_delete = []
+    if model_path_systran.exists():
+        paths_to_delete.append(model_path_systran)
+    if model_path_guillaumek.exists():
+        paths_to_delete.append(model_path_guillaumek)
+        
+    if not paths_to_delete:
         raise HTTPException(
             status_code=404,
             detail=f"Model {model_name} not found"
         )
-    
+
     try:
         import shutil
-        shutil.rmtree(model_path)
-        
+        for path in paths_to_delete:
+            shutil.rmtree(path)
+
         return {
             "model_name": model_name,
             "status": "deleted",
