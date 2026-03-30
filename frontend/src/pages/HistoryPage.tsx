@@ -53,14 +53,16 @@ export function HistoryPage() {
     }
   }
 
-  const handleExport = async (id: string, format: string) => {
+  const handleExport = async (id: string, format: string, fileName: string) => {
     try {
       const response = await fetch(`/api/v1/transcriptions/${id}/export?format=${format}`)
       const blob = await response.blob()
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `transcription.${format}`
+      // Remove the original audio/video extension before adding the export format
+      const nameWithoutExt = fileName.replace(/\.[^.]+$/, '')
+      a.download = `${nameWithoutExt}.${format}`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch (error) {
@@ -172,7 +174,7 @@ export function HistoryPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => handleExport(transcription.id, 'txt')}
+                          onClick={() => handleExport(transcription.id, 'txt', transcription.file_name)}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -205,16 +207,16 @@ export function HistoryPage() {
             <CardContent>
               <div className="space-y-4">
                 <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'txt')}>
+                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'txt', selectedTranscription.file_name)}>
                     Export TXT
                   </Button>
-                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'srt')}>
+                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'srt', selectedTranscription.file_name)}>
                     Export SRT
                   </Button>
-                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'vtt')}>
+                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'vtt', selectedTranscription.file_name)}>
                     Export VTT
                   </Button>
-                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'json')}>
+                  <Button variant="outline" onClick={() => handleExport(selectedTranscription.id, 'json', selectedTranscription.file_name)}>
                     Export JSON
                   </Button>
                 </div>

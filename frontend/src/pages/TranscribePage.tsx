@@ -151,7 +151,9 @@ export function TranscribePage() {
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
-      a.download = `${file?.name}.${format}`
+      // Remove the original audio/video extension before adding the export format
+      const nameWithoutExt = file?.name?.replace(/\.[^.]+$/, '') || 'transcription'
+      a.download = `${nameWithoutExt}.${format}`
       a.click()
       window.URL.revokeObjectURL(url)
     } catch (err) {
